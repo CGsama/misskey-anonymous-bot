@@ -1,0 +1,16 @@
+{
+  "name": "gcnmb",
+  "version": "0.0.1",
+  "description": "misskey-anonymous-bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "c@misskey.gothloli.club",
+  "license": "MIT",
+  "dependencies": {
+    "crypto-random-string": "^3.0.1",
+    "request-json": "^0.6.4",
+    "sqlite3": "^4.0.9"
+  }
+}
