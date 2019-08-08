@@ -1,4 +1,3 @@
-var stdin = process.openStdin();
 var fs = require('fs');
 var sqlite3 = require('sqlite3').verbose();
 var db = new sqlite3.Database(':memory:');
@@ -6,6 +5,7 @@ var request = require('request-json');
 var crypto = require('crypto');
 var cryptoRandomString = require('crypto-random-string');
 var readline = require('readline-sync');
+var configFile = 'config.json';
 
 var apikey = "";
 var myid = "";
@@ -16,6 +16,7 @@ var secretHashKey = "";
 var count = 0;
 var onLoad = false;
 var config = null;
+var mock = false;
 
 function createDB(){
 	db.run("CREATE TABLE IF NOT EXISTS gcnmb (msgid TEXT NOT NULL UNIQUE)");
@@ -42,12 +43,15 @@ function doExist(msgid, cb){
 }
 
 function sendPost(msg){
-	console.log(msg);
-	count++;
 	data = {text: msg.text + signMsg(msg), visibility: "public", localOnly: false, geo: null, i: apikey};
 	if(msg.fileid){
 		data.fileIds = [msg.fileid];
 	}
+	console.log(msg);
+	if(mock){
+		return;
+	}
+	count++;
 	msky.post('api/notes/create', data, function(err, res, body) {
 		if(err){
 			console.log(err);
@@ -136,10 +140,27 @@ function uploadFromUrl(msg, cb){
 	}
 }
 
+function getMyId(cb, ecb){
+	temp = request.createClient('https://' + instanceURL + '/')
+	data = {i: apikey};
+	count++;
+	temp.post('api/i', data, function(err, res, body) {
+		count--;
+		if(body && body.id){
+			myid = body.id;
+			cb();
+		}else{
+			console.log(err);
+			console.log(body);
+			ecb();
+		}
+	});
+}
+
 function pulling(){
 	setTimeout(function(){
 		console.log("Checking!");
-		pullAllChats();
+		getMyId(pullAllChats, null);
 	},5000);
 	setTimeout(pulling,60000);
 }
@@ -160,25 +181,9 @@ function counting(){
 	setTimeout(counting,100);
 }
 
-db = new sqlite3.Database('gcnmb.db');
-
-try{
-	let rawconfig = fs.readFileSync('config.json');
-}
-catch(e){
-	createDB();
-	let obj = {};
-	obj.apikey = readline.question("apikey?(e.g. 9p4pC6kQY20WFlKB) ");
-	obj.myid = readline.question("user id?(e.g. 7w8s0v4j3q) ");
-	obj.instanceURL = readline.question("instance url?(e.g. misskey.gothloli.club) ");
-	obj.secretSaltKey = cryptoRandomString({length: 16, type: 'hex'});
-	obj.secretHashKey = cryptoRandomString({length: 16, type: 'hex'});
-	fs.writeFileSync('config.json', JSON.stringify(obj));
-}
-finally{
-	config = JSON.parse(fs.readFileSync('config.json'));
+function run(){
+	config = JSON.parse(fs.readFileSync(configFile));
 	apikey = config.apikey;
-	myid = config.myid;
 	instanceURL = config.instanceURL;
 	secretSaltKey = config.secretSaltKey;
 	secretHashKey = config.secretHashKey;
@@ -186,3 +191,34 @@ finally{
 	pulling();
 	counting();
 }
+
+
+db = new sqlite3.Database('gcnmb.db');
+
+let rawconfig = fs.readFile('config.json', function(err, data){
+	if(err){
+		mock = readline.question("Dry run? Enter anything if not.") == "";
+		if(mock){
+			db = new sqlite3.Database(':memory:');
+			configFile = 'mock-config.json';
+		}
+		createDB();
+		let obj = {};
+		obj.instanceURL = readline.question("instance url?(e.g. misskey.gothloli.club) ");
+		obj.instanceURL = obj.instanceURL != "" ? obj.instanceURL : "misskey.gothloli.club"
+		obj.apikey = readline.question("apikey?(e.g. 9p4pC6kQY20WFlKB) ");
+		obj.secretSaltKey = cryptoRandomString({length: 16, type: 'hex'});
+		obj.secretHashKey = cryptoRandomString({length: 16, type: 'hex'});
+		instanceURL = obj.instanceURL;
+		apikey = obj.apikey;
+		getMyId(function(){
+			console.log("Credential works!");
+			fs.writeFileSync(configFile, JSON.stringify(obj));
+			run();
+		}, function(){
+			console.log("Credential or host name wrong!");
+		});
+	}else{
+		run();
+	}
+});
