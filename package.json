@@ -1,7 +1,7 @@
 {
   "name": "gcnmb",
   "version": "0.0.1",
-  "description": "misskey-anonymous-bot",
+  "description": "GothLoli Club Ni Ming Ban",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,6 +10,7 @@
   "license": "MIT",
   "dependencies": {
     "crypto-random-string": "^3.0.1",
+    "readline-sync": "^1.4.10",
     "request-json": "^0.6.4",
     "sqlite3": "^4.0.9"
   }
