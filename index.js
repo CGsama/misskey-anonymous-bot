@@ -44,7 +44,8 @@ function doExist(msgid, cb){
 }
 
 function sendPost(msg){
-	data = {text: msg.text + signMsg(msg), visibility: "public", localOnly: false, geo: null, i: apikey};
+	data = {text: msg.text + signMsg(msg), visibility: visibility, localOnly: false, geo: null, i: apikey};
+	console.log(data);
 	if(msg.fileid){
 		data.fileIds = [msg.fileid];
 	}
@@ -209,11 +210,11 @@ let rawconfig = fs.readFile('config.json', function(err, data){
 		obj.instanceURL = readline.question("instance url?(e.g. misskey.gothloli.club) ");
 		obj.instanceURL = obj.instanceURL != "" ? obj.instanceURL : "misskey.gothloli.club"
 		obj.apikey = readline.question("apikey?(e.g. 9p4pC6kQY20WFlKB) ");
-		let v = readline.question("visibility?(1:local, 2:followers, other:federation) ");
+		let v = readline.question("visibility?(1:home, 2:followers, other:public) ");
 		switch(v){
 			case "1":
 				obj.visibility = "home";
-				console.log("Visible for local");
+				console.log("Visible for home");
 				break;
 			case "2":
 				obj.visibility = "followers";
@@ -221,7 +222,7 @@ let rawconfig = fs.readFile('config.json', function(err, data){
 				break;
 			default:
 				obj.visibility = "public";
-				console.log("Visible for federation");
+				console.log("Visible for public");
 				break;
 		}
 		obj.secretSaltKey = cryptoRandomString({length: 16, type: 'hex'});
