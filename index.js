@@ -213,12 +213,15 @@ let rawconfig = fs.readFile('config.json', function(err, data){
 		switch(v){
 			case "1":
 				obj.visibility = "home";
+				console.log("Visible for local");
 				break;
 			case "2":
 				obj.visibility = "followers";
+				console.log("Visible for followers");
 				break;
 			default:
 				obj.visibility = "public";
+				console.log("Visible for federation");
 				break;
 		}
 		obj.secretSaltKey = cryptoRandomString({length: 16, type: 'hex'});
