@@ -13,6 +13,7 @@ var instanceURL = "";
 var msky = null;
 var secretSaltKey = "";
 var secretHashKey = "";
+var visibility = ""
 var count = 0;
 var onLoad = false;
 var config = null;
@@ -185,6 +186,7 @@ function run(){
 	config = JSON.parse(fs.readFileSync(configFile));
 	apikey = config.apikey;
 	instanceURL = config.instanceURL;
+	visibility = config.visibility;
 	secretSaltKey = config.secretSaltKey;
 	secretHashKey = config.secretHashKey;
 	msky = request.createClient('https://' + instanceURL + '/')
@@ -207,6 +209,18 @@ let rawconfig = fs.readFile('config.json', function(err, data){
 		obj.instanceURL = readline.question("instance url?(e.g. misskey.gothloli.club) ");
 		obj.instanceURL = obj.instanceURL != "" ? obj.instanceURL : "misskey.gothloli.club"
 		obj.apikey = readline.question("apikey?(e.g. 9p4pC6kQY20WFlKB) ");
+		let v = readline.question("visibility?(1:local, 2:followers, other:federation) ");
+		switch(v){
+			case "1":
+				obj.visibility = "home";
+				break;
+			case "2":
+				obj.visibility = "followers";
+				break;
+			default:
+				obj.visibility = "public";
+				break;
+		}
 		obj.secretSaltKey = cryptoRandomString({length: 16, type: 'hex'});
 		obj.secretHashKey = cryptoRandomString({length: 16, type: 'hex'});
 		instanceURL = obj.instanceURL;
