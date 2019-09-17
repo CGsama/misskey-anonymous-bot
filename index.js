@@ -68,16 +68,20 @@ function pullAllChats(){
 		if(err){
 			console.log(err);
 		}
-		if(body){
-			body.forEach(function(item){
-				let msg = msg2obj(item);
-				doExist(msg.id, function(exist){
-					console.log("history: " + msg.id + (exist ? " exist" : " not exist"));
-					if(!exist){
-						pullConversation(msg);
-					}
-				})
-			});
+		try{
+			if(body){
+				body.forEach(function(item){
+					let msg = msg2obj(item);
+					doExist(msg.id, function(exist){
+						console.log("history: " + msg.id + (exist ? " exist" : " not exist"));
+						if(!exist){
+							pullConversation(msg);
+						}
+					})
+				});
+			}
+		}catch(e){
+			console.log(e);
 		}
 	});
 }
