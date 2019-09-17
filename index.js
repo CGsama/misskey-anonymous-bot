@@ -166,7 +166,7 @@ function getMyId(cb, ecb){
 function pulling(){
 	setTimeout(function(){
 		console.log("Checking!");
-		getMyId(pullAllChats, null);
+		getMyId(pullAllChats, function(){});
 	},5000);
 	setTimeout(pulling,60000);
 }
